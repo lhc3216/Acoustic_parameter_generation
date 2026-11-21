@@ -1,0 +1,38 @@
+
+data_root: "/home/dell/lhc/generate_density/dataset_resampled_0.5mm"
+task: "train"
+
+num_workers: 8
+
+trainer:
+  epochs: 400
+  batch_size: 16
+  image_size: 512
+  learning_rate: 1e-4
+  weight_decay: 1e-5
+  gradient_clip: 1.0
+  save_dir: "checkpoints/vae"
+  save_interval: 50
+  log_interval: 10
+  resume_from: "vae_last.pth"
+  
+
+tester:
+  batch_size: 32
+  test_save_dir: "test_outputs/vae"
+  test_pt: "vae_last.pth"
+
+
+loss:
+  max_l1: 1.0
+  max_grad: 0.5
+  max_imp: 0.2   
+  max_kl: 1e-4
+  rho_min: 1000.0
+  rho_max: 1950.0
+  c_min: 1482.3
+  c_max: 3100.0
+
+hydra:
+  run:
+    dir: ${trainer.save_dir}/${task}

@@ -1,0 +1,80 @@
+data_root: "/home/dell/generate_density/dataset_resampled_0.5mm"
+num_workers: 6
+task: ""
+
+warm_start_from: ""
+new_resume_from: ""
+
+
+data:
+  use_cache: false
+
+model:
+  pretrained_model_name_or_path: "runwayml/stable-diffusion-v1-5/sd_v15_weights"
+  latent_channels: 4
+  cond_channels: 4
+  max_z_slices: 256
+  gradient_checkpointing: true
+
+diffusion:
+  num_train_timesteps: 1000
+  beta_start: 0.00085
+  beta_end: 0.012
+  beta_schedule: "scaled_linear"
+  prediction_type: "epsilon"
+  latent_scale_factor: 1.34636
+  static_threshold: 6
+  clip_sample: true
+  thresholding: false
+  dynamic_thresholding_ratio: 0.995
+  cfg_scale: 1
+  sample_steps: 20
+
+dropout_prob:
+  both: 1.0
+  mri_only: 0.0
+  ct_only: 0.0
+  uncond: 0.0
+  weaken_ct: 0.2
+  weaken_mri: 0.0
+  weaken_min_keep: 0.35
+  weaken_max_keep: 0.80
+
+loss:
+  lambda_noise: 1.0
+  lambda_l1: 0.1
+  
+  
+
+trainer:
+  save_dir: 'checkpoints/sd_z_check'
+  vae_ckpt: "/home/dell/lhc/generate_density/latent_diffusion/checkpoints/vae/basic_loss+grad+imp/best_vae.pth"
+  steps: 2000
+  epochs: 200
+  batch_size: 16
+  learning_rate: 1e-4
+  min_learning_rate: 1e-6
+  weight_decay: 1e-5
+  gradient_clip: 1.0
+  use_amp: true
+  resume_from: sd_latest.pth
+  val_start_step: 3000000000
+  val_a: 1000
+  val_b: 5000
+  log_interval: 100
+  save_interval: 10
+  grad_accum_steps: 2
+
+tester:
+  test_save_dir: "test_best_step"
+  test_pt: "/home/dell/lhc/generate_density/latent_diffusion/checkpoints/sd/basic_loss+l1/sd_latest.pth"
+  test_batch: 64
+  split: 'test'
+  now: "MRI"
+
+
+
+
+hydra:
+  run:
+    dir: ${trainer.save_dir}/${task}

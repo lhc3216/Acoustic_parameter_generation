@@ -1,0 +1,76 @@
+project_root: ${hydra:runtime.cwd}
+data_root: ${project_root}/dataset_resampled_0.5mm
+num_workers: 0
+task: "acoustic"
+strict_teacher_load: false
+
+model:
+  pretrained_model_name_or_path: "runwayml/stable-diffusion-v1-5/sd_v15_weights"
+  latent_channels: 4
+  cond_channels: 4
+  max_z_slices: 256
+  gradient_checkpointing: true
+
+diffusion:
+  num_train_timesteps: 1000
+  beta_start: 0.00085
+  beta_end: 0.012
+  beta_schedule: "scaled_linear"
+  prediction_type: "epsilon"
+
+dropout_prob:
+  both: 1.0
+  mri_only: 0.0
+  ct_only: 0.0
+  uncond: 0.0
+  weaken_ct: 0.2
+  weaken_mri: 0.0
+  weaken_min_keep: 0.35
+  weaken_max_keep: 0.80
+
+loss:
+  lambda_teacher: 1.0
+  lambda_recon: 0.5
+  lambda_dm: 1.0
+  lambda_gan: 0.1
+  lambda_fake_score: 1.0
+  lambda_disc: 1.0
+  dm_grad_clip: 1.0
+  latent_scale_factor: 1.34636
+  static_threshold: 6
+
+trainer:
+  epochs: 200
+  batch_size: 4
+  learning_rate: 5e-5
+  fake_learning_rate: 5e-5
+  min_learning_rate: 1e-6
+  fake_min_learning_rate: 1e-6
+  g_beta1: 0.9
+  g_beta2: 0.999
+  f_beta1: 0.9
+  f_beta2: 0.999
+  weight_decay: 1e-5
+  fake_weight_decay: 1e-5
+  gradient_clip: 1.0
+  fake_gradient_clip: 1.0
+  fake_steps_per_g: 5
+  fake_pretrain_epochs: 1
+  dm_warmup_epochs: 5
+  gan_warmup_epochs: 10
+  ema_decay: 0.999
+  use_amp: true
+  resume_from: ""
+  save_interval: 10
+  log_interval: 20
+
+paths:
+  vae_ckpt: ${project_root}/checkpoints/vae/vae_best.pth
+  teacher_sd_ckpt: ${project_root}/checkpoints/sd/${task}/sd_latest.pth
+  save_dir: ${project_root}/checkpoints/dmd2/${task}
+  tensorboard_dir: ${project_root}/runs/dmd2/${task}
+
+eval:
+  seed: 3407
+  deterministic: true
+  save_vis_max: 20
